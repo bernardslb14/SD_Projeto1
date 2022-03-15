@@ -20,7 +20,7 @@ public class ucDriveClient {
                 username = autenticacao(sc, in, out);
 
                 // Func 4 e 5 FEITO
-                navigateServerFiles(in, out, sc);
+                //navigateServerFiles(in, out, sc);
 
                 // Func 6 e 7 FEITO
                 //navigateLocalFiles(username, sc);
@@ -182,7 +182,7 @@ public class ucDriveClient {
                     dir += "\\" + buff;
                 }
                 if (elem.getBoolean("isFile")){
-                    uploadFile();
+                    uploadFile(dir + "\\" + buff);
                 }
                 foundFile = true;
                 break;
@@ -196,7 +196,7 @@ public class ucDriveClient {
     }
 
     //TODO:https://www.w3schools.com/java/java_files_create.asp
-    public static void uploadFile(){
+    public static void uploadFile(String filePath){
 
     }
     //TODO:https://www.w3schools.com/java/java_files_create.asp

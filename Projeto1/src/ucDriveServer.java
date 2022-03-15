@@ -3,7 +3,6 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import org.json.JSONArray;
 import org.json.JSONObject;
-
 import java.util.Scanner;
 
 
@@ -119,6 +118,14 @@ class TCPConnection extends Thread{
 
         if (flag){
             out.writeBoolean(true);
+
+            String[] lastDirArr = lastDir.split("");
+            for (int i = 0; i < lastDirArr.length; i++){
+                if (lastDirArr[i].equals("/"))
+                    lastDirArr[i] = "\\";
+            }
+            lastDir = String.join("", lastDirArr);
+
             JSONObject returnVal = new JSONObject();
             returnVal.put("username", username);
             returnVal.put("lastDir", lastDir);
@@ -193,10 +200,24 @@ class TCPConnection extends Thread{
             }
             String fileContents = buffer.toString();
 
-            String oldLine = username + "\\|" + password + "\\|" + oldDir;
-            String newLine = username + "\\|" + password + "\\|" + newDir;
+            String oldLine = username + "|" + password + "|" + oldDir;
+            String newLine = username + "|" + password + "|" + newDir;
 
-            fileContents = fileContents.replaceAll(oldLine, newLine);
+            String[] oldLineArr = oldLine.split("");
+            for (int i = 0; i < oldLineArr.length; i++){
+                if (oldLineArr[i].equals("\\"))
+                    oldLineArr[i] = "/";
+            }
+            oldLine = String.join("", oldLineArr);
+
+            String[] newLineArr = newLine.split("");
+            for (int i = 0; i < newLineArr.length; i++){
+                if (newLineArr[i].equals("\\"))
+                    newLineArr[i] = "/";
+            }
+            newLine = String.join("", newLineArr);
+
+            fileContents = fileContents.replace(oldLine, newLine);
 
             FileWriter writer = new FileWriter(filePath);
             writer.append(fileContents);
