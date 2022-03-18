@@ -3,25 +3,18 @@
   <component name="NewModuleRootManager" inherit-compiler-output="true">
     <exclude-output />
     <content url="file://$MODULE_DIR$">
-      <sourceFolder url="file://$MODULE_DIR$/ClientDir" type="java-resource" />
-      <sourceFolder url="file://$MODULE_DIR$/ServerDir" type="java-resource" />
-      <sourceFolder url="file://$MODULE_DIR$/ServerSecundaryDir" type="java-resource" />
       <sourceFolder url="file://$MODULE_DIR$/src" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/src/ClientDir" type="java-resource" />
-      <sourceFolder url="file://$MODULE_DIR$/src/ClientDir/username1" type="java-resource" />
-      <sourceFolder url="file://$MODULE_DIR$/src/ClientDir/username2" type="java-resource" />
-      <sourceFolder url="file://$MODULE_DIR$/src/ClientDir/username2/Nova pasta" type="java-resource" />
-      <sourceFolder url="file://$MODULE_DIR$/src/ClientDir/username2/Nova pasta/pasta1" type="java-resource" />
-      <sourceFolder url="file://$MODULE_DIR$/src/ClientDir/username3" type="java-resource" />
-      <sourceFolder url="file://$MODULE_DIR$/src/ServerDir" type="java-resource" />
-      <sourceFolder url="file://$MODULE_DIR$/src/ServerDir/username1" type="java-resource" />
-      <sourceFolder url="file://$MODULE_DIR$/src/ServerDir/username1/pasta1" type="java-resource" />
-      <sourceFolder url="file://$MODULE_DIR$/src/ServerDir/username1/pasta1/pasta2" type="java-resource" />
-      <sourceFolder url="file://$MODULE_DIR$/src/ServerDir/username2" type="java-resource" />
-      <sourceFolder url="file://$MODULE_DIR$/src/ServerDir/username3" type="java-resource" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="library" exported="" name="json-20211205" level="project" />
+    <orderEntry type="module-library" exported="">
+      <library>
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/json-20211205.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
   </component>
 </module>

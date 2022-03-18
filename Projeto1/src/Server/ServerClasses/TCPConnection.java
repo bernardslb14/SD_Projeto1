@@ -39,6 +39,10 @@ public class TCPConnection extends Thread{
             while (true){
                 String req = in.readUTF();
                 switch (req) {
+                    case "check" -> {
+                        okServer(in, out, sm);
+                    }
+
                     case "autenticacao" -> {
                         JSONObject resp = checkUser(in, out, rootPath);
                         if (resp != null) {
@@ -47,6 +51,10 @@ public class TCPConnection extends Thread{
                             this.curDirInit = resp.getString("lastDir");
                             this.password = resp.getString("password");
                         }
+                    }
+                    case "changePassword" -> {
+                        String resp = newPassword(in, out, rootPath);
+                        this.password = resp;
                     }
                     case "changeServerDir" -> {
                         curDir = changeDir(username, in, curDir, lastDirRequestedContent);
@@ -63,6 +71,13 @@ public class TCPConnection extends Thread{
             System.out.println("TCPS [ " + threadNr + " ] lost connection.");
             saveLastDir(username, password, curDirInit, curDir, rootPath);
         }
+    }
+
+    public static void okServer(DataInputStream in, DataOutputStream out, SharedMemory sm) throws IOException{
+        if(sm.isPrimaryServer())
+            out.writeBoolean(true);
+        else
+            out.writeBoolean(false);
     }
 
     public static JSONObject checkUser(DataInputStream in, DataOutputStream out, String rootPath) throws IOException{
@@ -113,6 +128,13 @@ public class TCPConnection extends Thread{
         else {
             return null;
         }
+    }
+
+    public static String newPassword(DataInputStream in, DataOutputStream out, String rootPath) throws IOException{
+        JSONObject dados = new JSONObject(in.readUTF());
+        String pw = dados.getString("newPW");
+
+        return pw;
     }
 
     public static String changeDir(String username, DataInputStream in, String dir, JSONArray curDirList) throws IOException{

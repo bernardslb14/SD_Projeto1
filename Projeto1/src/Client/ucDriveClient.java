@@ -5,6 +5,8 @@ import java.net.ConnectException;
 import java.net.Socket;
 import org.json.JSONArray;
 import org.json.JSONObject;
+
+import java.sql.SQLOutput;
 import java.util.Scanner;
 
 
@@ -15,29 +17,84 @@ public class ucDriveClient {
         int portB = 7000;
 
         int port = portA;
+        String ipA = "localhost";
+        String ipB = "localhost";
 
-        try(Socket s = new Socket("localhost", port)) {
-            DataInputStream in = new DataInputStream(s.getInputStream());
-            DataOutputStream out = new DataOutputStream(s.getOutputStream());
+        int opcao = -1;
 
-            try (Scanner sc = new Scanner(System.in)) {
+        while(true) {
+                Scanner sc = new Scanner(System.in);
+                System.out.println("MENU PRIMÁRIO\n[1] Login\n[2] Alterar configurações de conexão");
 
-                // Func 1 FEITO
-                //TODO: Encriptacao de passwords
-                //      Feedback de autenticacao falhada (dados errados)
-                username = autenticacao(sc, in, out);
+                switch (sc.nextInt()){
+                    case 1 -> {
+                        try (Socket s = new Socket("localhost", port)) {
+                            DataInputStream in = new DataInputStream(s.getInputStream());
+                            DataOutputStream out = new DataOutputStream(s.getOutputStream());
 
-                // Func 4, 5, 8 FEITO
-                //navigateServerFiles(username, in, out, sc, port);
 
-                // Func 6, 7, 9 FEITO
-                //navigateLocalFiles(username, sc, port);
-            }
-        } catch (ConnectException ce) {
-            System.out.println("Server not found.");
-        } catch (IOException e){
-            e.printStackTrace();
+                            while (true) {
+                                if (!checkServer(in, out)) {
+                                    continue;
+                                }
+                                // Func 1 FEITO
+                                //TODO: Encriptacao de passwords
+                                //      Feedback de autenticacao falhada (dados errados)
+                                username = autenticacao(sc, in, out);
+
+                                while (opcao != 1 && opcao != 0) {
+                                    System.out.println("MENU\n[2] Mudar password\n[3] Navegar pelos ficheiros do Server\n[4] Navegar pelos ficheiros Locais");
+                                    opcao = Integer.parseInt(sc.nextLine());
+
+                                    // Fun 2
+                                    changePassword(sc, in, out);
+
+                                    // Func 4, 5, 8 FEITO
+                                    //navigateServerFiles(username, in, out, sc, port);
+
+                                    // Func 6, 7, 9 FEITO
+                                    //navigateLocalFiles(username, sc, port);
+                                }
+                            }
+
+                        } catch (ConnectException ce) {
+                            System.out.println("Server not found.");
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                    case 2 -> {
+                        System.out.println("\t[1] Server A -> " + ipA + ":" + portA  + "\n\t[2] Server B -> " + ipB + ":" + portB);
+                        switch (sc.nextInt()){
+                            case 1 -> {
+                                //sc.nextLine();
+                                sc = new Scanner(System.in);
+                                System.out.println("xxx.xxx.xxx.xxx:xxxx");
+                                String input = sc.nextLine();
+                                String[] aux = input.split(":");
+                                ipA = aux[0];
+                                portA = Integer.parseInt(aux[1]);
+                            }
+                            case 2 -> {
+                                //sc.nextLine();
+                                sc = new Scanner(System.in);
+                                System.out.println("xxx.xxx.xxx.xxx:xxxx");
+                                String input = sc.nextLine();
+                                String[] aux = input.split(":");
+
+                                ipB = aux[0];
+                                portB = Integer.parseInt(aux[1]);
+                            }
+                        }
+                    }
+                }
         }
+    }
+
+    public static boolean checkServer (DataInputStream in, DataOutputStream out) throws IOException {
+        out.writeUTF("check");
+
+        return in.readBoolean();
     }
 
     public static String autenticacao(Scanner sc, DataInputStream in, DataOutputStream out) throws IOException{
@@ -62,6 +119,23 @@ public class ucDriveClient {
         else {
             System.out.println("Fail");
             return null;
+        }
+    }
+
+    public static void changePassword(Scanner sc, DataInputStream in, DataOutputStream out) throws IOException {
+        if(autenticacao(sc, in, out) != null){
+            out.writeUTF("change password");
+
+            System.out.println("New Password: ");
+            String newPW = sc.nextLine();
+
+            JSONObject aut = new JSONObject();
+            aut.put("newPW", newPW);
+
+            out.writeUTF(aut.toString());
+        }
+        else{
+            System.out.println("Try again");
         }
     }
 
