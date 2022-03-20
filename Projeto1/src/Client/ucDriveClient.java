@@ -16,7 +16,6 @@ public class ucDriveClient {
         int portA = 6000;
         int portB = 7000;
 
-        int port = portA;
         String ipA = "localhost";
         String ipB = "localhost";
 
@@ -28,14 +27,15 @@ public class ucDriveClient {
 
                 switch (sc.nextInt()){
                     case 1 -> {
-                        try (Socket s = new Socket("localhost", port)) {
+                        try (Socket s = new Socket(ipA, portA)) {
                             DataInputStream in = new DataInputStream(s.getInputStream());
                             DataOutputStream out = new DataOutputStream(s.getOutputStream());
 
 
                             while (true) {
                                 if (!checkServer(in, out)) {
-                                    continue;
+                                    System.out.println("Conecta-te ao servidor primário!");
+                                    break;
                                 }
                                 // Func 1 FEITO
                                 //TODO: Encriptacao de passwords
@@ -43,17 +43,24 @@ public class ucDriveClient {
                                 username = autenticacao(sc, in, out);
 
                                 while (opcao != 1 && opcao != 0) {
-                                    System.out.println("MENU\n[2] Mudar password\n[3] Navegar pelos ficheiros do Server\n[4] Navegar pelos ficheiros Locais");
-                                    opcao = Integer.parseInt(sc.nextLine());
+                                    System.out.println("\t\t[1] Mudar password\n\t[2] Navegar pelos ficheiros do Server\n\t[3] Navegar pelos ficheiros Locais\n\t[0] Sair");
+                                    opcao = sc.nextInt();
 
-                                    // Fun 2
-                                    changePassword(sc, in, out);
+                                    switch (opcao) {
+                                        case 1 -> {
+                                            //Func 2
+                                            changePassword(sc, in, out);
+                                        }
+                                        case 2 -> {
+                                            // Func 4, 5, 8 FEITO
+                                            navigateServerFiles(username, in, out, sc, portA);
+                                        }
+                                        case 3 -> {
+                                            // Func 6, 7, 9 FEITO
+                                            navigateLocalFiles(username, sc, portA);
+                                        }
+                                    }
 
-                                    // Func 4, 5, 8 FEITO
-                                    //navigateServerFiles(username, in, out, sc, port);
-
-                                    // Func 6, 7, 9 FEITO
-                                    //navigateLocalFiles(username, sc, port);
                                 }
                             }
 
@@ -100,6 +107,7 @@ public class ucDriveClient {
     public static String autenticacao(Scanner sc, DataInputStream in, DataOutputStream out) throws IOException{
         out.writeUTF("autenticacao");
 
+        sc = new Scanner(System.in);
         System.out.println("Username: ");
         String username = sc.nextLine();
 
@@ -123,20 +131,21 @@ public class ucDriveClient {
     }
 
     public static void changePassword(Scanner sc, DataInputStream in, DataOutputStream out) throws IOException {
-        if(autenticacao(sc, in, out) != null){
-            out.writeUTF("change password");
+        out.writeUTF("changePassword");
 
-            System.out.println("New Password: ");
-            String newPW = sc.nextLine();
+        System.out.println("");
+        sc = new Scanner(System.in);
 
-            JSONObject aut = new JSONObject();
-            aut.put("newPW", newPW);
+        System.out.println("New Password: ");
+        String newPW = sc.nextLine();
 
-            out.writeUTF(aut.toString());
-        }
-        else{
-            System.out.println("Try again");
-        }
+        JSONObject aut = new JSONObject();
+        aut.put("newPW", newPW);
+
+        out.writeUTF(aut.toString());
+
+        if(in.readBoolean())
+            System.out.println("OK");
     }
 
     public static JSONObject listServerFiles(DataInputStream in, DataOutputStream out) throws IOException {

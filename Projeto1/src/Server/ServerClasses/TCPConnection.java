@@ -53,8 +53,7 @@ public class TCPConnection extends Thread{
                         }
                     }
                     case "changePassword" -> {
-                        String resp = newPassword(in, out, rootPath);
-                        this.password = resp;
+                        saveLastDir(username, newPassword(in, out, password), curDirInit, curDir, rootPath);
                     }
                     case "changeServerDir" -> {
                         curDir = changeDir(username, in, curDir, lastDirRequestedContent);
@@ -130,9 +129,11 @@ public class TCPConnection extends Thread{
         }
     }
 
-    public static String newPassword(DataInputStream in, DataOutputStream out, String rootPath) throws IOException{
+    public static String newPassword(DataInputStream in, DataOutputStream out, String password) throws IOException{
         JSONObject dados = new JSONObject(in.readUTF());
         String pw = dados.getString("newPW");
+
+        out.writeBoolean(true);
 
         return pw;
     }
