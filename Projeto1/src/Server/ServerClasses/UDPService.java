@@ -65,7 +65,7 @@ public class UDPService extends Thread{
 
                 } catch (IOException ioe) {
                     System.out.println("Assuming Primary Server Role");
-                    synchThread.stop(); //VER MAIS TARDE
+                    //synchThread.interrupt();
                 }
             } catch (IOException e){
             }

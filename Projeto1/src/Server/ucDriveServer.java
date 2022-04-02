@@ -11,9 +11,9 @@ public class ucDriveServer {
         new UDPService(sm);
 
         //Start TCP Service
-        new TCPServer(sm);
+        new TCPServer(sm, 6000, 7000);
 
         //Start TCP File Transfer Service
-        new TCPFileTransfer(sm);
+        new TCPFileTransfer(sm, 6001, 7001);
     }
 }

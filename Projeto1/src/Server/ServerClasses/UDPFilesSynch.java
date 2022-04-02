@@ -56,23 +56,29 @@ public class UDPFilesSynch extends Thread{
             //SERVER SECUNDARIO
             try(DatagramSocket aSocket = new DatagramSocket(this.port)){
                 while(true){
+                    if (sm.isPrimaryServer())
+                        break;
                     JSONObject msg;
                     byte[] buffer = new byte[4*1024];
-
+                    aSocket.setSoTimeout(500);
                     DatagramPacket request = new DatagramPacket(buffer, buffer.length);
-                    aSocket.receive(request);
+                    try{
+                        aSocket.receive(request);
 
-                    msg = new JSONObject(new String(request.getData(), 0, request.getLength()));
-                    FileOutputStream fileOutputStream = new FileOutputStream(sm.getRootPath() + msg.getString("filePath"));
-                    long size = msg.getLong("fileSize");
+                        msg = new JSONObject(new String(request.getData(), 0, request.getLength()));
+                        FileOutputStream fileOutputStream = new FileOutputStream(sm.getRootPath() + msg.getString("filePath"));
+                        long size = msg.getLong("fileSize");
 
-                    byte[] fileData = new byte[Math.toIntExact(size)];
+                        byte[] fileData = new byte[Math.toIntExact(size)];
 
-                    DatagramPacket fileDatagram = new DatagramPacket(fileData, fileData.length);
-                    aSocket.receive(fileDatagram);
+                        DatagramPacket fileDatagram = new DatagramPacket(fileData, fileData.length);
+                        aSocket.receive(fileDatagram);
 
-                    fileOutputStream.write(fileData);
-                    fileOutputStream.close();
+                        fileOutputStream.write(fileData);
+                        fileOutputStream.close();
+                    } catch (SocketTimeoutException ignored){
+
+                    }
                 }
             } catch (IOException e) {
                 e.printStackTrace();
