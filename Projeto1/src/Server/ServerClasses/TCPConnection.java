@@ -53,7 +53,7 @@ public class TCPConnection extends Thread{
                         }
                     }
                     case "changePassword" -> {
-                        saveLastDir(username, newPassword(in, out, password), curDirInit, curDir, rootPath);
+                        saveLastDir(username, password, newPassword(in, out, password), curDirInit, curDir, rootPath);
                     }
                     case "changeServerDir" -> {
                         curDir = changeDir(username, in, curDir, lastDirRequestedContent);
@@ -65,10 +65,10 @@ public class TCPConnection extends Thread{
             }
         } catch (EOFException e) {
             System.out.println("TCPS [ " + threadNr + " ] disconnected.");
-            saveLastDir(username, password, curDirInit, curDir, rootPath);
+            saveLastDir(username, password, password, curDirInit, curDir, rootPath);
         } catch (IOException e) {
             System.out.println("TCPS [ " + threadNr + " ] lost connection.");
-            saveLastDir(username, password, curDirInit, curDir, rootPath);
+            saveLastDir(username, password, password, curDirInit, curDir, rootPath);
         }
     }
 
@@ -84,6 +84,7 @@ public class TCPConnection extends Thread{
 
         String username = dados.getString("username");
         String pw = dados.getString("password");
+
 
         String filePath = rootPath + "clients.txt";
         Boolean flag = false;
@@ -125,6 +126,7 @@ public class TCPConnection extends Thread{
             return returnVal;
         }
         else {
+            out.writeBoolean(false);
             return null;
         }
     }
@@ -191,7 +193,7 @@ public class TCPConnection extends Thread{
         return finalList;
     }
 
-    public static void saveLastDir(String username, String password, String oldDir, String newDir, String rootPath){
+    public static void saveLastDir(String username, String oldPassword, String newPassword, String oldDir, String newDir, String rootPath){
         String filePath = rootPath + "clients.txt";
 
         try(Scanner sc = new Scanner(new File(filePath))) {
@@ -201,8 +203,8 @@ public class TCPConnection extends Thread{
             }
             String fileContents = buffer.toString();
 
-            String oldLine = username + "|" + password + "|" + oldDir;
-            String newLine = username + "|" + password + "|" + newDir;
+            String oldLine = username + "|" + oldPassword + "|" + oldDir;
+            String newLine = username + "|" + newPassword + "|" + newDir;
 
             String[] oldLineArr = oldLine.split("");
             for (int i = 0; i < oldLineArr.length; i++){

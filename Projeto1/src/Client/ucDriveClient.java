@@ -19,9 +19,10 @@ public class ucDriveClient {
         String ipA = "localhost";
         String ipB = "localhost";
 
-        int opcao = -1;
+        int opcao;
 
         while(true) {
+                opcao = -1;
                 Scanner sc = new Scanner(System.in);
                 System.out.println("MENU PRIMÁRIO\n[1] Login\n[2] Alterar configurações de conexão");
 
@@ -41,9 +42,11 @@ public class ucDriveClient {
                                 //TODO: Encriptacao de passwords
                                 //      Feedback de autenticacao falhada (dados errados)
                                 username = autenticacao(sc, in, out);
+                                if(username == null)
+                                    break;
 
                                 while (opcao != 1 && opcao != 0) {
-                                    System.out.println("\t\t[1] Mudar password\n\t[2] Navegar pelos ficheiros do Server\n\t[3] Navegar pelos ficheiros Locais\n\t[0] Sair");
+                                    System.out.println("\t[1] Mudar password\n\t[2] Navegar pelos ficheiros do Server\n\t[3] Navegar pelos ficheiros Locais\n\t[0] Sair");
                                     opcao = sc.nextInt();
 
                                     switch (opcao) {
@@ -62,6 +65,9 @@ public class ucDriveClient {
                                     }
 
                                 }
+
+                                if(opcao == 1 || opcao == 0)
+                                    break;
                             }
 
                         } catch (ConnectException ce) {
@@ -76,8 +82,12 @@ public class ucDriveClient {
                             case 1 -> {
                                 //sc.nextLine();
                                 sc = new Scanner(System.in);
-                                System.out.println("xxx.xxx.xxx.xxx:xxxx");
+                                System.out.println("IP:Port");
                                 String input = sc.nextLine();
+                                while(!input.contains(":") || !input.split(":")[1].matches("[0-9]+")){
+                                    System.out.println("Please, respect the format required. Try again:");
+                                    input = sc.nextLine();
+                                }
                                 String[] aux = input.split(":");
                                 ipA = aux[0];
                                 portA = Integer.parseInt(aux[1]);
@@ -85,8 +95,12 @@ public class ucDriveClient {
                             case 2 -> {
                                 //sc.nextLine();
                                 sc = new Scanner(System.in);
-                                System.out.println("xxx.xxx.xxx.xxx:xxxx");
+                                System.out.println("IP:Port");
                                 String input = sc.nextLine();
+                                while(!input.contains(":") || !input.split(":")[1].matches("[0-9]+")){
+                                    System.out.println("Please, respect the format required. Try again:");
+                                    input = sc.nextLine();
+                                }
                                 String[] aux = input.split(":");
 
                                 ipB = aux[0];
@@ -114,6 +128,11 @@ public class ucDriveClient {
         System.out.println("Password: ");
         String password = sc.nextLine();
 
+        if(username.contains("|") || password.contains("|")){
+            System.out.println("Fail");
+            return null;
+        }
+
         JSONObject aut = new JSONObject();
         aut.put("username", username);
         aut.put("password", password);
@@ -138,6 +157,10 @@ public class ucDriveClient {
 
         System.out.println("New Password: ");
         String newPW = sc.nextLine();
+        while(newPW.contains("|") || newPW.length()==0){
+            System.out.println("Invalid character\nNew Password: ");
+            newPW = sc.nextLine();
+        }
 
         JSONObject aut = new JSONObject();
         aut.put("newPW", newPW);
@@ -246,6 +269,7 @@ public class ucDriveClient {
         String dir = "";
         String buff;
 
+        sc.nextLine();
         while (true){
             JSONArray curDirList = listLocalFiles(username, dir);
             System.out.println(">> Type 'exit' to quit Local Explorer");
