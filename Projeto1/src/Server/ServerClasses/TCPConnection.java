@@ -37,34 +37,30 @@ public class TCPConnection extends Thread{
     public void run(){
         try{
             while (true){
-                if (sm.isPrimaryServer()){
-                    String req = in.readUTF();
-                    switch (req) {
-                        case "check" -> {
-                            okServer(in, out, sm);
-                        }
+                String req = in.readUTF();
+                switch (req) {
+                    case "check" -> {
+                        okServer(in, out, sm);
+                    }
 
-                        case "autenticacao" -> {
-                            JSONObject resp = checkUser(in, out, rootPath);
-                            if (resp != null) {
-                                this.username = resp.getString("username");
-                                this.curDir = resp.getString("lastDir");
-                                this.curDirInit = resp.getString("lastDir");
-                                this.password = resp.getString("password");
-                            }
-                        }
-                        case "changePassword" -> {
-                            saveLastDir(username, password, newPassword(in, out, password), curDirInit, curDir, rootPath, sm);
-                        }
-                        case "changeServerDir" -> {
-                            curDir = changeDir(username, in, curDir, lastDirRequestedContent);
-                        }
-                        case "listServerDir" -> {
-                            lastDirRequestedContent = listServerFiles(username, out, curDir, rootPath);
+                    case "autenticacao" -> {
+                        JSONObject resp = checkUser(in, out, rootPath);
+                        if (resp != null) {
+                            this.username = resp.getString("username");
+                            this.curDir = resp.getString("lastDir");
+                            this.curDirInit = resp.getString("lastDir");
+                            this.password = resp.getString("password");
                         }
                     }
-                } else {
-                    out.writeUTF("");
+                    case "changePassword" -> {
+                        saveLastDir(username, password, newPassword(in, out, password), curDirInit, curDir, rootPath, sm);
+                    }
+                    case "changeServerDir" -> {
+                        curDir = changeDir(username, in, curDir, lastDirRequestedContent);
+                    }
+                    case "listServerDir" -> {
+                        lastDirRequestedContent = listServerFiles(username, out, curDir, rootPath);
+                    }
                 }
             }
         } catch (EOFException e) {

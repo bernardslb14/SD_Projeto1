@@ -6,6 +6,7 @@ import java.net.Socket;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.net.UnknownHostException;
 import java.sql.SQLOutput;
 import java.util.Scanner;
 
@@ -35,12 +36,10 @@ public class ucDriveClient {
 
                             while (true) {
                                 if (!checkServer(in, out)) {
-                                    System.out.println("Conecta-te ao servidor primário!");
-                                    break;
+                                    System.out.println("Conectaste-te ao servidor secundário!");
+                                    throw new ConnectException();
                                 }
                                 // Func 1 FEITO
-                                //TODO: Encriptacao de passwords
-                                //      Feedback de autenticacao falhada (dados errados)
                                 username = autenticacao(sc, in, out);
                                 if(username == null)
                                     break;
@@ -71,7 +70,47 @@ public class ucDriveClient {
                             }
 
                         } catch (ConnectException ce) {
-                            System.out.println("Server not found.");
+                            System.out.println("Trying Server B");
+                            try (Socket s = new Socket(ipB, portB)) {
+                                DataInputStream in = new DataInputStream(s.getInputStream());
+                                DataOutputStream out = new DataOutputStream(s.getOutputStream());
+
+
+                                while (true) {
+                                    if (!checkServer(in, out)) {
+                                        System.out.println("Conectaste-te ao servidor secundário!");
+                                        throw new ConnectException();
+                                    }
+                                    username = autenticacao(sc, in, out);
+                                    if (username == null)
+                                        break;
+
+                                    while (opcao != 1 && opcao != 0) {
+                                        System.out.println("\t[1] Mudar password\n\t[2] Navegar pelos ficheiros do Server\n\t[3] Navegar pelos ficheiros Locais\n\t[0] Sair");
+                                        opcao = sc.nextInt();
+
+                                        switch (opcao) {
+                                            case 1 -> {
+                                                changePassword(sc, in, out);
+                                            }
+                                            case 2 -> {
+                                                navigateServerFiles(username, in, out, sc, portB);
+                                            }
+                                            case 3 -> {
+                                                navigateLocalFiles(username, sc, portB);
+                                            }
+                                        }
+
+                                    }
+
+                                    if (opcao == 1 || opcao == 0)
+                                        break;
+                                }
+                            } catch (ConnectException ce2){
+                                System.out.println("No Servers were found!");
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
                         } catch (IOException e) {
                             e.printStackTrace();
                         }

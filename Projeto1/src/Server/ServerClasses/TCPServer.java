@@ -6,11 +6,13 @@ import java.net.ServerSocket;
 import java.net.Socket;
 
 public class TCPServer extends Thread {
-    int primaryPort = 6000;
-    int secundaryPort = 7000;
+    int primaryPort;
+    int secondaryPort;
     SharedMemory sm;
 
-    public TCPServer(SharedMemory sm) {
+    public TCPServer(SharedMemory sm, int primaryPort, int secondaryPort) {
+        this.primaryPort = primaryPort;
+        this.secondaryPort = secondaryPort;
         this.sm = sm;
         this.start();
     }
@@ -25,9 +27,9 @@ public class TCPServer extends Thread {
                 new TCPConnection(clientSocket, ++threadNr, sm.getRootPath(), sm);
             }
         } catch (BindException be){
-            try(ServerSocket listenSocket = new ServerSocket(this.secundaryPort)) {
+            try(ServerSocket listenSocket = new ServerSocket(this.secondaryPort)) {
                 while (true) {
-                    sm.setRootPath(".\\ServerSecundaryDir\\");
+                    sm.setRootPath(".\\ServerSecondaryDir\\");
                     Socket clientSocket = listenSocket.accept();
                     new TCPConnection(clientSocket, ++threadNr, sm.getRootPath(), sm);
                 }
