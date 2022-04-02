@@ -20,18 +20,16 @@ public class TCPServer extends Thread {
 
         try(ServerSocket listenSocket = new ServerSocket(this.primaryPort)) {
             while (true) {
-                if (sm.isPrimaryServer()) {
-                    Socket clientSocket = listenSocket.accept();
-                    new TCPConnection(clientSocket, ++threadNr, ".\\ServerDir\\", sm);
-                }
+                sm.setRootPath(".\\ServerDir\\");
+                Socket clientSocket = listenSocket.accept();
+                new TCPConnection(clientSocket, ++threadNr, sm.getRootPath(), sm);
             }
         } catch (BindException be){
             try(ServerSocket listenSocket = new ServerSocket(this.secundaryPort)) {
                 while (true) {
-                    if (sm.isPrimaryServer()) {
-                        Socket clientSocket = listenSocket.accept();
-                        new TCPConnection(clientSocket, ++threadNr, ".\\ServerSecundaryDir\\", sm);
-                    }
+                    sm.setRootPath(".\\ServerSecundaryDir\\");
+                    Socket clientSocket = listenSocket.accept();
+                    new TCPConnection(clientSocket, ++threadNr, sm.getRootPath(), sm);
                 }
             } catch (IOException e) {
                 e.printStackTrace();

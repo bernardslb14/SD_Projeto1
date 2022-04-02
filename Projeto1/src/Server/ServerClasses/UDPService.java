@@ -8,6 +8,7 @@ public class UDPService extends Thread{
     int timeBetweenPing = 1000; // ms
     int maxTimeOuts = 10; // totalTime = timeBetweenPing * maxTimeOuts
     SharedMemory sm;
+    UDPFilesSynch synchThread;
 
     public UDPService(SharedMemory sm) {
         this.sm = sm;
@@ -19,6 +20,8 @@ public class UDPService extends Thread{
             //SERVER PRIMARIO
             try (DatagramSocket aSocket = new DatagramSocket(this.port)) {
                 sm.setPrimaryServer(true);
+                synchThread = new UDPFilesSynch(this.port+1, sm);
+
                 while (true) {
                     byte[] buffer = new byte[1000];
                     DatagramPacket request = new DatagramPacket(buffer, buffer.length);
@@ -32,6 +35,8 @@ public class UDPService extends Thread{
                 int nr_pingsMissed = 0;
                 try(DatagramSocket aSocket = new DatagramSocket()){
                     sm.setPrimaryServer(false);
+                    synchThread = new UDPFilesSynch(this.port+1, sm);
+
                     while (true) {
                         byte[] buffer = new byte[1000];
                         String pingText = "ping";
@@ -50,7 +55,6 @@ public class UDPService extends Thread{
                             System.out.println("Pings Missed In Row: "+ nr_pingsMissed);
 
                             if (nr_pingsMissed > maxTimeOuts){
-                                System.out.println("Assuming Primary Server Role");
                                 throw new IOException();
                             }
                         } catch (InterruptedException interruptedException) {
@@ -60,6 +64,8 @@ public class UDPService extends Thread{
                     }
 
                 } catch (IOException ioe) {
+                    System.out.println("Assuming Primary Server Role");
+                    synchThread.stop(); //VER MAIS TARDE
                 }
             } catch (IOException e){
             }

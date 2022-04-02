@@ -37,38 +37,42 @@ public class TCPConnection extends Thread{
     public void run(){
         try{
             while (true){
-                String req = in.readUTF();
-                switch (req) {
-                    case "check" -> {
-                        okServer(in, out, sm);
-                    }
+                if (sm.isPrimaryServer()){
+                    String req = in.readUTF();
+                    switch (req) {
+                        case "check" -> {
+                            okServer(in, out, sm);
+                        }
 
-                    case "autenticacao" -> {
-                        JSONObject resp = checkUser(in, out, rootPath);
-                        if (resp != null) {
-                            this.username = resp.getString("username");
-                            this.curDir = resp.getString("lastDir");
-                            this.curDirInit = resp.getString("lastDir");
-                            this.password = resp.getString("password");
+                        case "autenticacao" -> {
+                            JSONObject resp = checkUser(in, out, rootPath);
+                            if (resp != null) {
+                                this.username = resp.getString("username");
+                                this.curDir = resp.getString("lastDir");
+                                this.curDirInit = resp.getString("lastDir");
+                                this.password = resp.getString("password");
+                            }
+                        }
+                        case "changePassword" -> {
+                            saveLastDir(username, password, newPassword(in, out, password), curDirInit, curDir, rootPath, sm);
+                        }
+                        case "changeServerDir" -> {
+                            curDir = changeDir(username, in, curDir, lastDirRequestedContent);
+                        }
+                        case "listServerDir" -> {
+                            lastDirRequestedContent = listServerFiles(username, out, curDir, rootPath);
                         }
                     }
-                    case "changePassword" -> {
-                        saveLastDir(username, password, newPassword(in, out, password), curDirInit, curDir, rootPath);
-                    }
-                    case "changeServerDir" -> {
-                        curDir = changeDir(username, in, curDir, lastDirRequestedContent);
-                    }
-                    case "listServerDir" -> {
-                        lastDirRequestedContent = listServerFiles(username, out, curDir, rootPath);
-                    }
+                } else {
+                    out.writeUTF("");
                 }
             }
         } catch (EOFException e) {
             System.out.println("TCPS [ " + threadNr + " ] disconnected.");
-            saveLastDir(username, password, password, curDirInit, curDir, rootPath);
+            saveLastDir(username, password, password, curDirInit, curDir, rootPath, sm);
         } catch (IOException e) {
             System.out.println("TCPS [ " + threadNr + " ] lost connection.");
-            saveLastDir(username, password, password, curDirInit, curDir, rootPath);
+            saveLastDir(username, password, password, curDirInit, curDir, rootPath, sm);
         }
     }
 
@@ -84,7 +88,6 @@ public class TCPConnection extends Thread{
 
         String username = dados.getString("username");
         String pw = dados.getString("password");
-
 
         String filePath = rootPath + "clients.txt";
         Boolean flag = false;
@@ -126,7 +129,6 @@ public class TCPConnection extends Thread{
             return returnVal;
         }
         else {
-            out.writeBoolean(false);
             return null;
         }
     }
@@ -193,7 +195,7 @@ public class TCPConnection extends Thread{
         return finalList;
     }
 
-    public static void saveLastDir(String username, String oldPassword, String newPassword, String oldDir, String newDir, String rootPath){
+    public static void saveLastDir(String username, String oldPassword, String newPassword, String oldDir, String newDir, String rootPath, SharedMemory sm){
         String filePath = rootPath + "clients.txt";
 
         try(Scanner sc = new Scanner(new File(filePath))) {
@@ -228,5 +230,9 @@ public class TCPConnection extends Thread{
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+        JSONObject op = new JSONObject();
+        op.put("filePath", "clients.txt");
+        sm.addOperation(op.toString());
     }
 }

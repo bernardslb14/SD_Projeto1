@@ -48,6 +48,11 @@ public class TCPFileTransferConnection extends Thread{
                         size -= bytes;      // read upto file size
                     }
                     fileOutputStream.close();
+
+                    JSONObject op = new JSONObject();
+                    op.put("filePath", username + "\\" + serverFileDir + "\\" + serverFileName);
+
+                    sm.addOperation(op.toString());
                 }
                 case "downloadFromServer" -> {
                     String username = req.getString("username");
